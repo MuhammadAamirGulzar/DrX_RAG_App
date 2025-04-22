@@ -23,7 +23,7 @@ A Retrieval-Augmented Generation (RAG) system for document question answering an
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/rag-document-qa.git
+   git clone https://github.com/MuhammadAamirGulzar/DrX_RAG_App.git
    cd DrX-RAG-APP
    ```
 
