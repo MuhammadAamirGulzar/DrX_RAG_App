@@ -50,7 +50,7 @@ A Retrieval-Augmented Generation (RAG) system for document question answering an
    streamlit run app.py
    ```
 
-2. Open your browser and navigate to the URL provided by Streamlit (typically http://localhost:8501)
+2. Open your browser and navigate to the URL provided by Streamlit (typically http://localhost:8502)
 
 3. Upload documents:
    - Click the "Upload PDF or DOCX files" button in the sidebar
@@ -70,6 +70,8 @@ A Retrieval-Augmented Generation (RAG) system for document question answering an
 ## 🧩 Project Structure
 
 - `app.py`: Main application file with Streamlit UI
+- 'text_processing.py': Text reading and chunking
+- 'vector_db.py': Vector db data collection locally
 - `rag.py`: Core RAG functionality and conversation management
 - `summary.py`: Document summarization capabilities
 
