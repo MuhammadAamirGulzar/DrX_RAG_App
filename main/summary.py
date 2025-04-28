@@ -5,7 +5,7 @@ import nltk
 import re
 import torch
 from typing import Dict, Any, List
-from rag import RAGQueryEngine
+from main.rag import RAGQueryEngine
 
 def count_tokens(text: str, tokenizer) -> int:
     """Count the number of tokens in a text string"""

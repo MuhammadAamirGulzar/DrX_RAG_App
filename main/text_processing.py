@@ -1,17 +1,19 @@
-# app.py - Main application file
 import os
-from typing import List
+from typing import List, Dict, Any, Tuple, Union, Optional
 import torch
 import tiktoken
-import chromadb
-import streamlit as st
 import tempfile
 import PyPDF2
 import docx
-from typing import List, Dict, Any, Tuple
+import pandas as pd
 import time
 
-
+# Import the Excel/CSV processing code
+from main.excel_processing import (
+    read_excel, read_csv, process_tabular_file, 
+    RowBasedChunking, ColumnBasedChunking, SemanticChunking,
+    infer_best_chunking_strategy
+)
 
 # File handling functions
 def read_pdf(file_path: str) -> List[Tuple[int, str]]:
@@ -82,6 +84,11 @@ def read_file(file_path: str) -> List[Tuple[int, str]]:
         return read_pdf(file_path)
     elif file_path.lower().endswith('.docx'):
         return read_docx(file_path)
+    elif file_path.lower().endswith(('.xlsx', '.xls')):
+        return read_excel(file_path)
+    elif file_path.lower().endswith(('.csv')):
+        return read_csv(file_path)
+        # return [(0, "Tabular file - please use process_tabular_file instead")]
     else:
         raise ValueError(f"Unsupported file format: {file_path}")
 
@@ -108,26 +115,92 @@ def chunk_text(text: str, filename: str, page_num: int, max_tokens: int = 512) -
         chunks.append({
             "chunk_number": len(chunks) + 1,
             "text": chunk_text,
-            "meta_data": {"filename": filename, "page_number": page_num}
+            "meta_data": {
+                "filename": filename, 
+                "page_number": page_num,
+                "content_type": "document_text"
+            }
         })
     
     return chunks
 
-def process_file(file_path: str, filename: str) -> List[Dict]:
+def process_file(file_path: str, filename: str, 
+                max_tokens: int = 512, 
+                chunking_strategy: str = "auto") -> List[Dict]:
     """
     Process a file and create chunks.
     
     Args:
         file_path: Path to the file
         filename: Name to use in metadata
+        max_tokens: Maximum tokens per chunk
+        chunking_strategy: Strategy for tabular data ("row", "column", "semantic", or "auto")
         
     Returns:
         List of chunks
     """
-    all_chunks = []
-    pages = read_file(file_path)
+    # Process based on file extension
+    file_ext = os.path.splitext(file_path)[1].lower()
     
-    for page_num, text in pages:
-        all_chunks.extend(chunk_text(text, filename, page_num))
+    if file_ext in ['.xlsx', '.xls', '.csv']:
+        # For tabular data files
+        
+        # Select chunking strategy
+        strategy_class = RowBasedChunking  # Default
+        group_by_column = None
+        
+        if chunking_strategy == "auto":
+            # Infer the best strategy based on data characteristics
+            strategy_class, group_by_column = infer_best_chunking_strategy(file_path)
+        elif chunking_strategy == "row":
+            strategy_class = RowBasedChunking
+        elif chunking_strategy == "column":
+            strategy_class = ColumnBasedChunking
+        elif chunking_strategy == "semantic":
+            strategy_class, group_by_column = infer_best_chunking_strategy(file_path)
+            strategy_class = SemanticChunking
+            
+        # Process the tabular file
+        chunks, structure_summary = process_tabular_file(
+            file_path, 
+            filename, 
+            chunking_strategy=strategy_class,
+            group_by_column=group_by_column,
+            max_tokens=max_tokens
+        )
+        
+        # Add the structure summary to the chunks
+        all_chunks = [structure_summary] + chunks
+        
+    else:
+        # Standard processing for PDF and DOCX
+        all_chunks = []
+        pages = read_file(file_path)
+        
+        for page_num, text in pages:
+            all_chunks.extend(chunk_text(text, filename, page_num, max_tokens))
     
     return all_chunks
+
+def get_file_type(file_name: str) -> str:
+    """
+    Determine file type from file name
+    
+    Args:
+        file_name: Name of the file
+        
+    Returns:
+        File type description
+    """
+    extension = os.path.splitext(file_name)[1].lower()
+    
+    if extension == '.pdf':
+        return "PDF Document"
+    elif extension == '.docx':
+        return "Word Document"
+    elif extension in ['.xlsx', '.xls']:
+        return "Excel Spreadsheet"
+    elif extension == '.csv':
+        return "CSV File"
+    else:
+        return "Unknown File Type"
