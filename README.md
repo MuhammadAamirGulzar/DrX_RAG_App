@@ -1,3 +1,6 @@
+
+https://github.com/user-attachments/assets/6f1154c5-f18a-401e-ba7e-91dbf43885ec
+
 # RAG Document Q&A System
 
 A Retrieval-Augmented Generation (RAG) system for document question answering and summarization built with Streamlit, ChromaDB, and Meta's Llama model.
