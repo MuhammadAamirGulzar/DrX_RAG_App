@@ -1,5 +1,5 @@
 
-https://github.com/user-attachments/assets/6f1154c5-f18a-401e-ba7e-91dbf43885ec
+https://github.com/user-attachments/assets/487ca9b1-2bba-4326-842a-d2e533eb7a2f
 
 # RAG Document Q&A System
 
