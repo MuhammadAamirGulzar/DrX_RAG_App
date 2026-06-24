@@ -1,3 +1,5 @@
+"""Document translation pipeline for multilingual ingestion workflows."""
+
 import os
 from typing import List, Dict, Any, Tuple, Union, Optional
 import torch

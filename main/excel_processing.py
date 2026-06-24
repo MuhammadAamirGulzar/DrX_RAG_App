@@ -1,3 +1,5 @@
+"""Tabular file parsing and chunking strategies for retrieval ingestion."""
+
 import pandas as pd
 import numpy as np
 from pathlib import Path

@@ -1,11 +1,6 @@
-# app.py - Main application file
-import os
-from typing import List
-import torch
-import tiktoken
-import chromadb
-import streamlit as st
-from typing import List, Dict, Any, Tuple
+"""Embedding and persistence helpers for ChromaDB storage."""
+
+from typing import List, Dict
 import time
 
 

@@ -1,17 +1,8 @@
-import os
+"""Retrieval and answer generation engine for the RAG workflow."""
+
 import torch
-import tiktoken
-import chromadb
-import streamlit as st
-import tempfile
-import PyPDF2
-import docx
-from sentence_transformers import SentenceTransformer
-from transformers import AutoTokenizer, AutoModelForCausalLM
 from typing import List, Dict, Any, Tuple
 import time
-
-# Add a token counter function at the beginning of the RAGQueryEngine class
 
 
 class ConversationManager:
@@ -166,7 +157,6 @@ Context information:
             
         return assistant_response
 
-    # Modify the query method to include token metrics
     def query(self, user_question: str) -> Tuple[str, List[str], List[Dict], Dict]:
         """
         Process a user question and generate an answer using RAG.

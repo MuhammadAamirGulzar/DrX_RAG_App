@@ -1,3 +1,5 @@
+"""Document summarization and lightweight quality evaluation utilities."""
+
 import time
 from nltk.tokenize import sent_tokenize
 from rouge_score import rouge_scorer
@@ -11,6 +13,8 @@ def count_tokens(text: str, tokenizer) -> int:
     """Count the number of tokens in a text string"""
     tokens = tokenizer.encode(text)
     return len(tokens)
+
+
 def generate_document_summary_from_text(full_text: str, filename: str, rag_engine: RAGQueryEngine, 
                                         max_length: int = 1000) -> Dict[str, Any]:
     """
@@ -274,7 +278,6 @@ Please provide a comprehensive summary of this document. Focus on the main point
         "tokens_per_second": tokens_per_second
     }
 
-# Rest of the file remains the same
 def generate_extractive_summary(text: str, max_sentences: int = 10) -> str:
     """
     Generate a simple extractive summary by selecting important sentences.

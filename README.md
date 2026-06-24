@@ -1,165 +1,129 @@
+# Multi-Format RAG Assistant
 
-https://github.com/user-attachments/assets/487ca9b1-2bba-4326-842a-d2e533eb7a2f
+A production-oriented Retrieval-Augmented Generation (RAG) application for document intelligence across PDF, DOCX, XLSX/XLS, and CSV.
 
-# RAG Document Q&A System
+The system combines semantic retrieval, multilingual translation, conversational Q&A, and document summarization in a single Streamlit interface.
 
-A Retrieval-Augmented Generation (RAG) system for document question answering and summarization built with Streamlit, ChromaDB, and Meta's Llama model.
+## What This Product Solves
 
-## 🌟 Features
+Teams often need answers from mixed-format documents without building separate pipelines for narrative text and tabular data. This application provides:
 
-- **Document Question Answering**: Ask questions about your documents and get accurate answers with source attribution
-- **Document Summarization**: Generate comprehensive summaries of uploaded documents
-- **Multiple File Format Support**: Process PDF, DOCX, Excel (XLSX/XLS), and CSV files
-- **Tabular Data Processing**: Intelligent chunking of Excel and CSV data with multiple strategies
-- **Document Translation**: Translate documents from multiple languages to English before processing
-- **Conversation History**: Maintain context across multiple questions
-- **Performance Metrics**: Track token usage and generation time
+- context-grounded answers with source traceability
+- robust handling for text and spreadsheet data
+- optional translation before indexing for multilingual workflows
+- summary generation with lightweight quality scoring
 
-## 🛠️ Installation
+## Core Capabilities
+
+- Multi-format ingestion: PDF, DOCX, XLSX/XLS, CSV
+- Retrieval-augmented question answering with conversation history
+- Tabular chunking strategies: row-based, column-based, semantic, auto-inferred
+- Document translation pipeline with format-preserving output
+- Document summarization with ROUGE-based reference scoring
+- Runtime metrics for embedding and generation performance
+
+## System Architecture
+
+Detailed design notes are documented in `ARCHITECTURE.md`. High-level flow:
+
+1. Ingest and parse files by type.
+2. Optionally translate source content.
+3. Chunk text/tabular content and generate embeddings.
+4. Persist chunks in ChromaDB.
+5. Retrieve top-k chunks for user queries.
+6. Build prompt with conversation memory and source context.
+7. Generate grounded responses with Llama 3.2 1B Instruct.
+
+## Tech Stack
+
+- Application layer: Streamlit
+- LLM inference: Hugging Face Transformers + PyTorch
+- Retriever embeddings: sentence-transformers (nomic-ai/nomic-embed-text-v2-moe)
+- Vector store: ChromaDB (persistent local collection)
+- Document processing: PyPDF2, python-docx, pandas, openpyxl
+- Translation: Helsinki-NLP Marian models with multilingual fallback
+- Evaluation: NLTK sentence tokenization + ROUGE
+
+## Repository Layout
+
+- `app.py` - Streamlit UI and orchestration workflow
+- `main/rag.py` - retrieval and answer generation engine
+- `main/text_processing.py` - file parsing and chunk preparation
+- `main/excel_processing.py` - tabular structure analysis and chunking strategies
+- `main/translation.py` - translation workflow per document type
+- `main/summary.py` - abstractive summary generation and ROUGE scoring
+- `main/vector_db.py` - embedding generation and Chroma persistence
+
+## Local Setup
 
 ### Prerequisites
 
-- Python 3.13+
-- PyTorch
-- RAM (8GB+ recommended)
-- GPU acceleration recommended but can be run on CPU
+- Python 3.11+ recommended
+- 8 GB RAM minimum, 16 GB preferred
+- CUDA-capable GPU optional (CPU mode supported)
 
-### Setup
+### Install
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/MuhammadAamirGulzar/DrX_RAG_App.git
-   cd DrX-RAG-APP
-   ```
+```bash
+git clone https://github.com/MuhammadAamirGulzar/DrX_RAG_App.git
+cd DrX_RAG_App
+```
 
-2. Create and activate a virtual environment using environment file:
-   ```bash
-    conda env create -f environment.yml
-   ```
+Option 1: Conda
 
-3. Install dependencies (optional if you dont create venv using environment.yml file):
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+conda env create -f environment.yml
+conda activate drx-rag-app
+```
 
-4. Download NLTK data (required for summarization):
-   ```python
-   import nltk
-   nltk.download('punkt')
-   ```
+Option 2: venv + pip
 
-## 🚀 Usage
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-1. Start the Streamlit application:
-   ```bash
-   streamlit run app.py
-   ```
+Download required NLTK tokenizer resource:
 
-2. Open your browser and navigate to the URL provided by Streamlit (typically http://localhost:8502)
+```python
+import nltk
+nltk.download("punkt")
+```
 
-3. Upload documents:
-   - Click the "Upload PDF, DOCX, Excel or CSV files" button in the sidebar
-   - Select one or more files from your computer
-   - For Excel/CSV files, select a chunking strategy (auto, row, column, or semantic)
-   - Click "Process Documents" to extract, embed text and store in chromaDB
+## Run
 
-4. Translate documents (optional):
-   - Click "Translate" button next to an uploaded document
-   - Select source language and target language
-   - Click "Start Translation" to translate the document before processing
-   - After translation completes, click "Process" to embed and store the translated content
+```bash
+streamlit run app.py
+```
 
-5. Ask questions:
-   - Type your question in the input field
-   - Click "Ask" to generate an answer
-   - View the sources used and performance metrics
+Open the local URL printed by Streamlit, upload documents, process them, then use the Q&A and Summaries tabs.
 
-6. Generate summaries:
-   - Click "Summarize" next to a document in the sidebar
-   - The summary will appear in the "Document Summaries" tab
-   - Summaries include ROUGE evaluation metrics and performance statistics
+## Operational Notes
 
-## 🧩 Project Structure
+- First run downloads and caches embedding + generation models.
+- ChromaDB persistence path: `chroma_db/`.
+- Local model cache directories: `embed_model/` and `llm_dir/`.
+- Large documents are summarized using representative-section selection to reduce context overflow.
 
-- `app.py`: Main application file with Streamlit UI
-- `text_processing.py`: Text reading and chunking
-- `excel_processing.py`: Excel and CSV file processing
-- `vector_db.py`: Vector db data collection locally
-- `rag.py`: Core RAG functionality and conversation management
-- `summary.py`: Document summarization capabilities
-- `translation.py`: Document translation functionality
+## Performance Considerations
 
-## 🔧 Configuration
+- Retrieval quality is sensitive to chunking strategy and document cleanliness.
+- Generation latency depends on model size, token count, and hardware.
+- Translation adds pre-indexing latency but improves cross-language retrieval consistency.
 
-The system uses these default settings, which can be modified in the code:
+## Known Limitations
 
-- Maximum conversation history: 5 QA pairs
-- Top-k retrieval: 5 document chunks per query
-- Maximum chunk size: 512 tokens
-- Maximum summary length: 1000 tokens
-- Default target language: English
-- Excel/CSV chunking strategy: Auto-detect
+- Long-context behavior is constrained by model token limits.
+- Summary quality varies by source structure and language complexity.
+- Table-heavy files with ambiguous headers may require explicit chunking strategy selection.
 
-## 🤔 How It Works
+## Suggested GitHub Metadata
 
-1. **Document Processing**:
-   - Documents are uploaded and optionally translated
-   - Text is extracted and split into chunks
-   - For tabular data, intelligent chunking strategies are applied based on data structure
-   - Chunks are embedded using SentenceTransformer and stored in ChromaDB
+- Repository name: `multiformat-rag-assistant`
+- Description: `Multi-format RAG app with translation, semantic retrieval, and summarization for PDF, DOCX, Excel, and CSV.`
+- Topics: `rag`, `retrieval-augmented-generation`, `streamlit`, `llm`, `chromadb`, `sentence-transformers`, `transformers`, `document-qa`, `summarization`, `machine-translation`, `python`, `vector-search`
 
-2. **Translation**:
-   - Documents can be translated before processing
-   - Multiple language pairs supported (e.g., French→English, Urdu→English)
-   - Document structure is preserved during translation
-   - Translated documents are processed and embedded in English for better semantic matching
+## License
 
-3. **Question Answering**:
-   - User question is embedded
-   - Most semantically similar document chunks are retrieved
-   - A prompt is constructed with the question and retrieved context
-   - LLama 3.2 1B Instruct model generates an answer
-
-4. **Summarization**:
-   - Full document text is processed directly
-   - For large documents, representative sections are selected
-   - An abstractive summary is generated using the language model
-   - An extractive summary is created for ROUGE evaluation
-   - The summary is stored in ChromaDB for future retrieval
-
-## 🔄 Memory Optimization
-
-The system is optimized for memory efficiency:
-- Document text is loaded only when needed
-- Text is cleared from memory after processing
-- Only summaries are stored persistently
-- Automatic device detection for GPU acceleration
-- Temporary files cleaned up properly after processing
-
-## ⚠️ Limitations
-
-- Context window limited by the model's maximum token count
-- Very large documents may need representative selection
-- Quality of answers depends on the quality of retrieved chunks
-- Translation quality depends on the language model and complexity of content
-- Performance may vary based on hardware capabilities
-
-## 📚 Required Libraries
-
-- `streamlit`: For the web interface
-- `torch`: For PyTorch operations
-- `transformers`: For the LLM backend and translation models
-- `sentence-transformers`: For embedding generation
-- `chromadb`: For vector database storage
-- `PyPDF2`: For PDF processing
-- `python-docx`: For DOCX processing
-- `pandas`: For Excel/CSV processing
-- `openpyxl`: For Excel file handling
-- `fpdf`: For PDF generation after translation
-- `nltk`: For text processing and evaluation
-- `rouge-score`: For summary evaluation
-- `sentencepiece`: For translation model tokenization
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+Licensed under Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0). See `LICENSE` for details.

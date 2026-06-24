@@ -1,3 +1,5 @@
+"""Document parsing and chunk preparation utilities for ingestion."""
+
 import os
 from typing import List, Dict, Any, Tuple, Union, Optional
 import torch

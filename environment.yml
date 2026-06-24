@@ -1,4 +1,4 @@
-name: osos
+name: drx-rag-app
 channels:
   - defaults
   - conda-forge
@@ -195,4 +195,3 @@ dependencies:
       - websocket-client==1.8.0
       - websockets==15.0.1
       - wrapt==1.17.2
-prefix: C:\Anaconda3\envs\osos

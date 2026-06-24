@@ -1,5 +1,6 @@
-# app.py - Main application file
+"""Streamlit application entrypoint for the multi-format RAG assistant."""
 import os
+import ast
 from typing import List, Dict, Any, Tuple, Union, Optional
 import torch
 import tiktoken
@@ -74,7 +75,6 @@ def init_system():
     
     return collection, model, rag_engine
 
-# Add a helper function for cleaning up temporary files
 def cleanup_temp_file(temp_file_path):
     """Safely clean up a temporary file with proper error handling"""
     try:
@@ -104,7 +104,6 @@ def cleanup_temp_file(temp_file_path):
         st.warning(f"Error during file cleanup: {str(e)}")
 
 
-# Update the main function to include translation options
 def main():
     # Disable file watcher to avoid PyTorch class registration issues
     os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
@@ -478,7 +477,7 @@ def main():
                                 if summary_results["documents"] and len(summary_results["documents"]) > 0:
                                     # Summary exists, retrieve it
                                     summary_doc = summary_results["documents"][0]
-                                    summary_data = eval(summary_doc) if isinstance(summary_doc, str) else summary_doc
+                                    summary_data = ast.literal_eval(summary_doc) if isinstance(summary_doc, str) else summary_doc
                                     st.session_state.summaries[file.name] = summary_data
                                     st.success(f"Retrieved existing summary for {file.name}")
                                 else:
@@ -524,9 +523,6 @@ def main():
     
     # Create tabs for Q&A and Summaries only (removed Tabular Data Structure tab)
     tab1, tab2 = st.tabs(["Question & Answer", "Document Summaries"])
-    
-    # Rest of the code remains the same as before...
-    # ...
     
     # Tab 1: Q&A Interface
     with tab1:
